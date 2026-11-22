@@ -1,0 +1,29 @@
+{
+  "title": "Meio DPS",
+  "summary": "Damage and DPS on your spell, attack and weapon tooltips, plus what each really did in your fights.",
+  "cfCategory": "Tooltip",
+  "cfExtra": [
+    "Combat"
+  ],
+  "wagoCategories": [
+    "Tooltip",
+    "Combat"
+  ],
+  "gallery": [
+    {
+      "file": "before-after.png",
+      "title": "Before and after",
+      "description": "Shadow Bolt and Sinister Strike: the game's tooltips alone, then with damage, DPS, cost, expected and measured damage"
+    },
+    {
+      "file": "hunter.png",
+      "title": "Auto Shot and bow",
+      "description": "A hunter's Auto Shot per shot and measured, beside a bow's DPS with your attack power"
+    },
+    {
+      "file": "warrior.png",
+      "title": "Mortal Strike, Shift held",
+      "description": "How Mortal Strike's hit adds up from the axe and attack power, beside the axe's tooltip"
+    }
+  ]
+}
