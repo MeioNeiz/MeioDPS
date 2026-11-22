@@ -8,6 +8,8 @@
 ## Author: MeioNeiz
 ## X-Website: https://github.com/MeioNeiz/MeioDPS
 ## X-License: MIT
+## X-Curse-Project-ID: 1824041
+## X-Wago-ID: YK9xY36L
 ## SavedVariables: MeioDPSDB
 ## SavedVariablesPerCharacter: MeioDPSCharDB
 
