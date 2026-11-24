@@ -20,7 +20,8 @@ really did.
 - Weapons: their DPS with your attack power
 - Measured: real damage per cast from Blizzard's damage meter
 
-Hold Shift for the maths, and on spells your ranks side by side per mana.
+Hold Shift for the maths, and on spells your ranks side by side per mana. On action bars and
+bags the tooltip updates as you press Shift; elsewhere, hover again with Shift held.
 
 Settings: Esc > Options > AddOns > MeioDPS, or `/meiodps`.
 

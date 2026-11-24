@@ -779,22 +779,10 @@ end
 ---------------------------------------------------------------------------
 -- Events
 ---------------------------------------------------------------------------
--- Show or drop the Shift lines on the tooltip under the mouse. Our RefreshData runs
--- Blizzard's whole rebuild tainted, which errors on the secret line colours of combat, so
--- never in combat. Action and bag buttons need none of it: their UpdateTooltip rebuilds
--- the tooltip (untainted) every 0.2 s and picks Shift up by itself.
-local function RefreshForShift()
-    local tt = GameTooltip
-    if InCombatLockdown() or not tt:IsShown() or not tt.RefreshData then return end
-    local owner = tt:GetOwner()
-    if owner and owner.UpdateTooltip or tt.UpdateTooltip then return end
-    local ok, data = pcall(tt.GetTooltipData, tt)
-    if not (ok and Readable(data)) then return end
-    local types = Enum.TooltipDataType
-    if data.type ~= types.Spell and data.type ~= types.Item then return end
-    tt:RefreshData()
-end
-
+-- No refresh on Shift: rebuilding a Blizzard tooltip from addon code (RefreshData) leaves
+-- tainted state on it, and its next rebuild in combat errors on the secret line colours.
+-- Action and bag buttons rebuild themselves every 0.2 s and pick Shift up; elsewhere the
+-- Shift lines show on the next hover.
 local function ClearShiftHint(tt) tt.meioShiftHint = nil end
 
 local function HookTooltips()
@@ -832,7 +820,6 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2, arg3)
         f:RegisterEvent("PLAYER_REGEN_ENABLED")
         f:RegisterEvent("PLAYER_ENTER_COMBAT")
         f:RegisterEvent("PLAYER_LEAVE_COMBAT")
-        f:RegisterEvent("MODIFIER_STATE_CHANGED")
         f:RegisterEvent("PLAYER_LOGIN")
         ns.db, ns.charDB = db, charDB
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_CHANNEL_START" then
@@ -850,8 +837,6 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2, arg3)
         TrimToPull()
     elseif event == "PLAYER_REGEN_ENABLED" then
         OnFightEnd()
-    elseif event == "MODIFIER_STATE_CHANGED" then
-        if arg1 == "LSHIFT" or arg1 == "RSHIFT" then RefreshForShift() end
     elseif event == "PLAYER_LOGIN" then
         local ok, err = pcall(ns.RegisterSettings)
         if not ok then geterrorhandler()(err) end

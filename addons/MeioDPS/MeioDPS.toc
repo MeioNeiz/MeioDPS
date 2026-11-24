@@ -4,7 +4,7 @@
 ## Category: Meio
 ## IconTexture: Interface\Icons\Spell_Shadow_ShadowBolt
 ## AddonCompartmentFunc: MeioDPS_OnAddonCompartmentClick
-## Version: 1.0.0
+## Version: 1.0.1
 ## Author: MeioNeiz
 ## X-Website: https://github.com/MeioNeiz/MeioDPS
 ## X-License: MIT
