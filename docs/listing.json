@@ -1,6 +1,6 @@
 {
   "title": "Meio DPS",
-  "summary": "Damage and DPS on your spell, attack and weapon tooltips, plus what each really did in your fights.",
+  "summary": "Damage, DPS and best rank per mana on your spell and attack tooltips.",
   "cfCategory": "Tooltip",
   "cfExtra": [
     "Combat"
