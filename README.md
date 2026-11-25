@@ -21,6 +21,10 @@ really did.
 - Attack, Auto Shot and wand Shoot: damage per swing or shot, and DPS
 - Weapons: their DPS with your attack power
 - Measured: real damage per cast from Blizzard's damage meter
+- Action buttons: each damage spell's damage per cast on its button (or measured, or DPS)
+
+![A warlock's action bar with each spell's damage per cast in small white numbers at the
+bottom of its button](docs/buttons.png)
 
 Hold Shift for the maths, and on spells your ranks side by side per mana. On action bars and
 bags the tooltip updates as you press Shift; elsewhere, hover again with Shift held.
@@ -30,6 +34,7 @@ Settings: Esc > Options > AddOns > MeioDPS, or `/meiodps`.
 - `/meiodps casts`: everything measured so far
 - `/meiodps forget`: clear the measured damage
 - `/meiodps on`, `/meiodps off`: all tooltip lines
+- `/meiodps buttons`: numbers on action buttons on or off; `/meiodps buttons expected|measured|dps` picks what they show
 - `/meiodps help`: every command, each line on or off
 
 ## Install

@@ -1,5 +1,10 @@
 # Meio DPS
 
+## 1.1.0
+
+- Damage on action buttons: each damage spell's damage per cast in small text on its
+  button (or measured per cast, or DPS); Settings > Action buttons, `/meiodps buttons`
+
 ## 1.0.1
 
 - Fixed: pressing Shift over a tooltip could cause a Lua error in combat later (the refresh

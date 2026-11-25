@@ -32,6 +32,7 @@ local BAD = { 1, 0.5, 0.5 }
 local DEFAULTS = {
     enabled = true, mana = true, heal = true, shards = true, lifetap = true, ranks = true,
     expected = true, measured = true, auto = true, weapon = true,
+    buttons = true, buttonShow = "expected",
 }
 local db, charDB
 
@@ -738,6 +739,7 @@ local function Learn(counted, totals, seconds)
         end
     end
     LearnMelee(totals, seconds)
+    ns.RefreshButtons()
 end
 
 -- The meter lists a pet's spells under its owner (rows with a creatureName). Should a pet
@@ -840,6 +842,8 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2, arg3)
     elseif event == "PLAYER_LOGIN" then
         local ok, err = pcall(ns.RegisterSettings)
         if not ok then geterrorhandler()(err) end
+        ok, err = pcall(ns.InitButtons)
+        if not ok then geterrorhandler()(err) end
     end
 end)
 
@@ -874,10 +878,18 @@ local CMD = "|cffffd100/meiodps%s|r"
 local function Cmd(sub) return CMD:format(sub and " " .. sub or "") end
 local function OnOff(v) return v and "|cff80ff80on|r" or "|cffff8080off|r" end
 
+local function ButtonMode(key)
+    for _, m in ipairs(ns.BUTTON_MODES) do
+        if m.key == key then return m end
+    end
+end
+
 local function PrintStatus()
     local parts = {}
     for _, t in ipairs(ns.TOGGLES) do parts[#parts + 1] = t.key .. " " .. OnOff(db[t.key]) end
     Say(("tooltip lines %s (%s)"):format(OnOff(db.enabled), table.concat(parts, ", ")))
+    print(("  Action buttons: %s, %s"):format(OnOff(db.buttons),
+        (ButtonMode(db.buttonShow) or ns.BUTTON_MODES[1]).what))
     local n = 0
     for _ in pairs(charDB.measured) do n = n + 1 end
     print(("  Measured: %d. Last damage meter read: %s"):format(n,
@@ -886,18 +898,38 @@ local function PrintStatus()
 end
 
 local function PrintHelp()
-    Say("damage, DPS and damage per mana on spell, ability and weapon tooltips")
+    Say("damage, DPS and damage per mana on spell, ability and weapon tooltips and on "
+        .. "action buttons")
     print(("  %s - open the settings"):format(Cmd()))
     print(("  %s - what's on, and the last damage meter read"):format(Cmd("status")))
     print(("  %s - all tooltip lines (now %s)"):format(Cmd("on||off"), OnOff(db.enabled)))
     for _, t in ipairs(ns.TOGGLES) do
         print(("  %s - %s (now %s)"):format(Cmd(t.key), t.what, OnOff(db[t.key])))
     end
+    print(("  %s - damage on action buttons (now %s)"):format(Cmd("buttons"),
+        OnOff(db.buttons)))
+    print(("  %s - what buttons show (now %s)"):format(
+        Cmd("buttons expected||measured||dps"), db.buttonShow))
     print(("  %s - measured damage per spell so far"):format(Cmd("casts")))
     print(("  %s - clear the measured damage"):format(Cmd("forget")))
     print(("  %s - print each fight's casts and meter totals (now %s)"):format(Cmd("debug"),
         OnOff(db.debug)))
     print(("  Settings: Esc > Options > AddOns > MeioDPS (%s)"):format(Cmd("settings")))
+end
+
+local function ButtonsCmd(arg)
+    if arg == "" or arg == "on" or arg == "off" then
+        if arg == "" then db.buttons = not db.buttons else db.buttons = arg == "on" end
+        Say("damage on action buttons " .. OnOff(db.buttons))
+    elseif ButtonMode(arg) then
+        db.buttonShow, db.buttons = arg, true
+        Say("action buttons show " .. ButtonMode(arg).what)
+    else
+        Say(('unknown command "buttons %s"'):format(arg))
+        PrintHelp()
+        return
+    end
+    ns.RefreshButtons()
 end
 
 local function PrintCasts()
@@ -928,6 +960,7 @@ end
 
 function ns.Forget()
     wipe(charDB.measured)
+    ns.RefreshButtons()
     Say("measured damage cleared")
 end
 
@@ -953,6 +986,8 @@ SlashCmdList.MEIODPS = function(msg)
     elseif msg == "on" or msg == "off" then
         db.enabled = (msg == "on")
         Say("tooltip lines " .. OnOff(db.enabled))
+    elseif msg:match("^buttons%f[%A]") then
+        ButtonsCmd(msg:match("^buttons%s*(.-)$"))
     elseif TOGGLE[msg] then
         db[msg] = not db[msg]
         Say(TOGGLE[msg].what .. " " .. OnOff(db[msg]))

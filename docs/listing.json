@@ -16,6 +16,11 @@
       "description": "Shadow Bolt and Sinister Strike: the game's tooltips alone, then with damage, DPS, cost, expected and measured damage"
     },
     {
+      "file": "buttons.png",
+      "title": "Damage on your buttons",
+      "description": "Each damage spell's damage per cast on its action button; measured or DPS in Settings"
+    },
+    {
       "file": "ranks.png",
       "title": "Best rank per mana",
       "description": "Shadow Bolt with Shift held: every rank you know per mana and per cast second, the best per mana in green for downranking"

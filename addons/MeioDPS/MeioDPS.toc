@@ -1,10 +1,10 @@
 ## Interface: 16001
 ## Title: MeioDPS
-## Notes: Damage and DPS on spell, ability, auto attack and weapon tooltips, plus what each really did, from the damage meter. /meiodps
+## Notes: Damage and DPS on spell, ability, auto attack and weapon tooltips and on action buttons, plus what each really did, from the damage meter. /meiodps
 ## Category: Meio
 ## IconTexture: Interface\Icons\Spell_Shadow_ShadowBolt
 ## AddonCompartmentFunc: MeioDPS_OnAddonCompartmentClick
-## Version: 1.0.1
+## Version: 1.1.0
 ## Author: MeioNeiz
 ## X-Website: https://github.com/MeioNeiz/MeioDPS
 ## X-License: MIT
@@ -17,5 +17,6 @@ Data.lua
 Parse.lua
 Weapon.lua
 MeioDPS.lua
+Buttons.lua
 Settings.lua
 API.lua

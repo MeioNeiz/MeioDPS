@@ -29,6 +29,7 @@ local function Checkbox(key, name, tip)
     local setting = Settings.RegisterAddOnSetting(category, "MEIODPS_" .. key:upper(), key,
         ns.db, Settings.VarType.Boolean, name, key ~= "debug")
     Settings.CreateCheckbox(category, setting, tip)
+    return setting
 end
 
 local function Header(layout, title, tip)
@@ -47,6 +48,25 @@ function ns.RegisterSettings()
     Header(layout, "Tooltip lines", "Which lines tooltips show. Hold Shift on a spell or "
         .. "weapon for the maths and your ranks. /meiodps help lists the commands.")
     for _, t in ipairs(ns.TOGGLES) do Checkbox(t.key, t.label, TIPS[t.key]) end
+    Header(layout, "Action buttons", "Numbers on your action bar buttons, for spells and "
+        .. "macros that cast one. /meiodps buttons")
+    local buttons = Checkbox("buttons", "Show on buttons", "Each damage spell's "
+        .. "number in small text at the bottom of its button. /meiodps buttons does the "
+        .. "same.")
+    local show = Settings.RegisterAddOnSetting(category, "MEIODPS_BUTTONSHOW", "buttonShow",
+        ns.db, Settings.VarType.String, "Buttons show", "expected")
+    Settings.CreateDropdown(category, show, function()
+        local c = Settings.CreateControlTextContainer()
+        for _, m in ipairs(ns.BUTTON_MODES) do c:Add(m.key, m.label) end
+        return c:GetData()
+    end, "Expected: damage per cast after your chance to hit and crit. Measured: what it "
+        .. "really did per cast in your fights (green), expected until 3 casts. DPS: "
+        .. "expected damage per second. /meiodps buttons expected||measured||dps")
+    for _, s in ipairs({ buttons, show }) do
+        if s.SetValueChangedCallback then
+            s:SetValueChangedCallback(function() ns.RefreshButtons() end)
+        end
+    end
     Header(layout, "Troubleshooting", "/meiodps debug, /meiodps forget")
     Checkbox("debug", "Print each fight", "After each fight, prints in chat the casts "
         .. "MeioDPS counted and the damage meter's totals.")
