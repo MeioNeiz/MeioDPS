@@ -37,6 +37,11 @@ Settings: Esc > Options > AddOns > MeioDPS, or `/meiodps`.
 - `/meiodps buttons`: numbers on action buttons on or off; `/meiodps buttons expected|measured|dps` picks what they show
 - `/meiodps help`: every command, each line on or off
 
+## Coming soon
+
+- Damage on Bartender4, ElvUI and Dominos buttons too
+- Works on non-English game clients
+
 ## Install
 
 Use your addon manager (CurseForge, Wago), or unzip a GitHub release into
