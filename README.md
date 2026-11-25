@@ -23,11 +23,14 @@ really did.
 - Measured: real damage per cast from Blizzard's damage meter
 - Action buttons: each damage spell's damage per cast on its button (or measured, or DPS)
 
-![A warlock's action bar with each spell's damage per cast in small white numbers at the
-bottom of its button](docs/buttons.png)
+![A hunter's Auto Shot tooltip with damage per shot, DPS, expected and measured, beside a
+bow's tooltip with its DPS with your attack power](docs/hunter.png)
 
 Hold Shift for the maths, and on spells your ranks side by side per mana. On action bars and
 bags the tooltip updates as you press Shift; elsewhere, hover again with Shift held.
+
+![Shadow Bolt with Shift held: how its damage is worked out, then every rank you know per
+mana and per cast second, Rank 3 in green as the best per mana](docs/ranks.png)
 
 Settings: Esc > Options > AddOns > MeioDPS, or `/meiodps`.
 
