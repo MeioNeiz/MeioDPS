@@ -16,6 +16,11 @@
       "description": "Shadow Bolt and Sinister Strike: the game's tooltips alone, then with damage, DPS, cost, expected and measured damage"
     },
     {
+      "file": "ranks.png",
+      "title": "Best rank per mana",
+      "description": "Shadow Bolt with Shift held: every rank you know per mana and per cast second, the best per mana in green for downranking"
+    },
+    {
       "file": "hunter.png",
       "title": "Auto Shot and bow",
       "description": "A hunter's Auto Shot per shot and measured, beside a bow's DPS with your attack power"

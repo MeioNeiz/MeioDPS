@@ -25,6 +25,9 @@ really did.
 Hold Shift for the maths, and on spells your ranks side by side per mana. On action bars and
 bags the tooltip updates as you press Shift; elsewhere, hover again with Shift held.
 
+![Shadow Bolt on the action bar with Shift held: "Your ranks" lists ranks 1 to 6 per mana and
+per cast second, rank 3 green as the best per mana](docs/ranks.png)
+
 Settings: Esc > Options > AddOns > MeioDPS, or `/meiodps`.
 
 - `/meiodps casts`: everything measured so far
