@@ -1,5 +1,15 @@
 # Meio DPS
 
+## 1.2.0
+
+- Damage on action buttons is now off by default. This update turns it off once for
+  everyone, since the last version saved it as on whether you chose it or not. To have it
+  back: `/meiodps buttons on`, or Esc > Options > AddOns > MeioDPS > Show on buttons. What
+  the buttons show (expected, measured or DPS) is kept
+- Numbers on Bartender4, ElvUI and Dominos buttons too
+- Fixed: a button's number no longer runs into a big reagent count (Soul Fire with 20+
+  shards): it moves above the count, and back to the middle when the count goes
+
 ## 1.1.0
 
 - Damage on action buttons: each damage spell's damage per cast in small text on its

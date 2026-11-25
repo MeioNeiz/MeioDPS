@@ -32,7 +32,7 @@ local BAD = { 1, 0.5, 0.5 }
 local DEFAULTS = {
     enabled = true, mana = true, heal = true, shards = true, lifetap = true, ranks = true,
     expected = true, measured = true, auto = true, weapon = true,
-    buttons = true, buttonShow = "expected",
+    buttons = false, buttonShow = "expected",
 }
 local db, charDB
 
@@ -185,6 +185,7 @@ local function Fmt(v)
     if v >= 100 then return ("%d"):format(math.floor(v + 0.5)) end
     return (("%.1f"):format(v):gsub("%.0$", ""))
 end
+ns.Fmt = Fmt
 
 local function Secs(v)
     v = math.floor(v * 100 + 0.5) / 100
@@ -740,6 +741,7 @@ local function Learn(counted, totals, seconds)
     end
     LearnMelee(totals, seconds)
     ns.RefreshButtons()
+    ns.RefreshTable()
 end
 
 -- The meter lists a pet's spells under its owner (rows with a creatureName). Should a pet
@@ -811,6 +813,9 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2, arg3)
         f:UnregisterEvent("ADDON_LOADED")
         MeioDPSDB = MeioDPSDB or {}
         db = MeioDPSDB
+        -- 1.1.0 saved its defaults (buttons on), so on can't be told from chosen: off
+        -- once for everyone when numbers on buttons became off by default
+        if not db.buttonsOffOnce then db.buttons, db.buttonsOffOnce = false, true end
         for k, v in pairs(DEFAULTS) do if db[k] == nil then db[k] = v end end
         MeioDPSCharDB = MeioDPSCharDB or {}
         charDB = MeioDPSCharDB
@@ -901,6 +906,9 @@ local function PrintHelp()
     Say("damage, DPS and damage per mana on spell, ability and weapon tooltips and on "
         .. "action buttons")
     print(("  %s - open the settings"):format(Cmd()))
+    if ns.TABLE_LISTED then
+        print(("  %s - your damage spells side by side, best in green"):format(Cmd("spells")))
+    end
     print(("  %s - what's on, and the last damage meter read"):format(Cmd("status")))
     print(("  %s - all tooltip lines (now %s)"):format(Cmd("on||off"), OnOff(db.enabled)))
     for _, t in ipairs(ns.TOGGLES) do
@@ -912,6 +920,9 @@ local function PrintHelp()
         Cmd("buttons expected||measured||dps"), db.buttonShow))
     print(("  %s - measured damage per spell so far"):format(Cmd("casts")))
     print(("  %s - clear the measured damage"):format(Cmd("forget")))
+    if ns.TABLE_LISTED then
+        print(("  %s - put the spell table back in the middle"):format(Cmd("reset")))
+    end
     print(("  %s - print each fight's casts and meter totals (now %s)"):format(Cmd("debug"),
         OnOff(db.debug)))
     print(("  Settings: Esc > Options > AddOns > MeioDPS (%s)"):format(Cmd("settings")))
@@ -961,6 +972,7 @@ end
 function ns.Forget()
     wipe(charDB.measured)
     ns.RefreshButtons()
+    ns.RefreshTable()
     Say("measured damage cleared")
 end
 
@@ -983,6 +995,11 @@ SlashCmdList.MEIODPS = function(msg)
         PrintStatus()
     elseif msg == "casts" then
         PrintCasts()
+    elseif msg == "spells" or msg == "table" then
+        ns.ToggleTable()
+    elseif msg == "reset" then
+        ns.ResetTable()
+        Say("spell table back in the middle")
     elseif msg == "on" or msg == "off" then
         db.enabled = (msg == "on")
         Say("tooltip lines " .. OnOff(db.enabled))

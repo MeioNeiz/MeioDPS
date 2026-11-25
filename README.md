@@ -1,7 +1,7 @@
 # Meio DPS
 
-Damage and DPS on your spell, attack and weapon tooltips and action buttons, and what each
-really did in your fights.
+Damage and DPS on your spell, attack and weapon tooltips, and what each really did in your
+fights.
 
 For WoW Forever.
 
@@ -21,7 +21,9 @@ really did.
 - Attack, Auto Shot and wand Shoot: damage per swing or shot, and DPS
 - Weapons: their DPS with your attack power
 - Measured: real damage per cast from Blizzard's damage meter
-- Action buttons: each damage spell's damage per cast on its button (or measured, or DPS)
+- Action buttons, off by default: each damage spell's damage per cast on its button (or
+  measured, or DPS), on Blizzard's bars, Bartender4, ElvUI and Dominos. Turn on with
+  `/meiodps buttons on` or Settings > Action buttons
 
 ![A hunter's Auto Shot tooltip with damage per shot, DPS, expected and measured, beside a
 bow's tooltip with its DPS with your attack power](docs/hunter.png)
@@ -37,12 +39,11 @@ Settings: Esc > Options > AddOns > MeioDPS, or `/meiodps`.
 - `/meiodps casts`: everything measured so far
 - `/meiodps forget`: clear the measured damage
 - `/meiodps on`, `/meiodps off`: all tooltip lines
-- `/meiodps buttons`: numbers on action buttons on or off; `/meiodps buttons expected|measured|dps` picks what they show
+- `/meiodps buttons on`, `/meiodps buttons off`: numbers on action buttons (off by default); `/meiodps buttons expected|measured|dps` picks what they show
 - `/meiodps help`: every command, each line on or off
 
 ## Coming soon
 
-- Damage on Bartender4, ElvUI and Dominos buttons too
 - Works on non-English game clients
 - A table of every damage spell you know, side by side: damage, per cast second, per mana
   and measured; click a column to sort (`/meiodps spells`)

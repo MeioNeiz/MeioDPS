@@ -3,10 +3,15 @@
 -- per spell until stats, gear or spells change. Event driven, no OnUpdate.
 local _, ns = ...
 
--- Blizzard's bars; Bartender, Dominos and ElvUI buttons are their own frames
 local BARS = { "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton",
     "MultiBarRightButton", "MultiBarLeftButton", "MultiBar5Button", "MultiBar6Button",
     "MultiBar7Button" }
+-- Bartender4 and ElvUI (its own copy) make LibActionButton buttons; Dominos makes
+-- ActionBarButtonTemplate ones and reuses some of Blizzard's. All are made at their
+-- addon's login, which can come after ours.
+local LABS = { "LibActionButton-1.0", "LibActionButton-1.0-ElvUI" }
+local NAMED = { "BT4Button%d", "DominosActionButton%d" }
+local BAR_ADDONS = { Bartender4 = true, Dominos = true, ElvUI = true }
 local THROTTLE = 0.2
 local WHITE = { 1, 1, 1 }
 local MEASURED = { 0.45, 1, 0.45 }
@@ -21,7 +26,7 @@ ns.BUTTON_MODES = {
 
 local isSecret = issecretvalue or function() return false end
 
-local buttons, labels, cache = {}, {}, {}
+local buttons, known, labButtons, labels, cache = {}, {}, {}, {}, {}
 local pending
 
 local function Short(v)
@@ -68,13 +73,29 @@ local function SlotSpell(slot)
     end
 end
 
--- bottom centre; above a macro's name, left of a reagent count
+local function HasText(fs)
+    if not (fs and fs:IsShown()) then return false end
+    local text = fs:GetText()
+    return isSecret(text) or text ~= nil and text ~= ""
+end
+
+-- the number and the count side by side would touch (1234 beside 28)
+local function Crowded(fs, b, count)
+    local ok, crowded = pcall(function()
+        return fs:GetStringWidth() + count:GetStringWidth() + 9 > b:GetWidth()
+    end)
+    return ok and crowded
+end
+
+-- bottom centre; above a macro's name, left of a reagent count (above it if too wide)
 local function Place(fs, b)
     fs:ClearAllPoints()
     local name, count = b.Name, b.Count
-    if name and name:IsShown() and (name:GetText() or "") ~= "" then
+    if HasText(name) then
         fs:SetPoint("BOTTOM", b, "BOTTOM", 0, 13)
-    elseif count and count:IsShown() and (count:GetText() or "") ~= "" then
+    elseif HasText(count) and Crowded(fs, b, count) then
+        fs:SetPoint("BOTTOMLEFT", b, "BOTTOMLEFT", 5, 19)
+    elseif HasText(count) then
         fs:SetPoint("BOTTOMLEFT", b, "BOTTOMLEFT", 5, 5)
     else
         fs:SetPoint("BOTTOM", b, "BOTTOM", 0, 5)
@@ -85,16 +106,40 @@ end
 local function Label(b)
     local fs = labels[b]
     if not fs then
-        fs = (b.TextOverlayContainer or b):CreateFontString(nil, "OVERLAY",
+        local layer = b.TextOverlayContainer or b.HotKey and b.HotKey:GetParent() or b
+        fs = layer:CreateFontString(nil, "OVERLAY",
             "GameFontHighlightSmallOutline")
         labels[b] = fs
     end
     return fs
 end
 
+local function Slot(v)
+    return type(v) == "number" and not isSecret(v) and v > 0 and v
+end
+
+-- LibActionButton reads its slot from the paging state; it can also hold a spell, an item
+-- or a macro of its own (custom bars): spells only
+local function LabSpell(b)
+    local ok, kind, value = pcall(b.GetAction, b)
+    if not ok then kind, value = b._state_type, b._state_action end
+    if isSecret(kind) then return nil end
+    if kind == "action" then
+        value = Slot(value)
+        return value and SlotSpell(value)
+    end
+    if kind == "spell" and not isSecret(value) then return value end
+end
+
+local function ButtonSpell(b)
+    if labButtons[b] or b._state_type ~= nil then return LabSpell(b) end
+    -- Dominos' buttons have ID 0 and their slot in the "action" attribute
+    local slot = Slot(b.action) or b.GetAttribute and Slot(b:GetAttribute("action"))
+    return slot and SlotSpell(slot)
+end
+
 local function Update(b)
-    local slot = b.action
-    local id = type(slot) == "number" and not isSecret(slot) and SlotSpell(slot)
+    local id = ButtonSpell(b)
     local text, colour
     if type(id) == "number" and not isSecret(id) then text, colour = Value(id) end
     if text then
@@ -145,6 +190,53 @@ local MOVED = { "ACTIONBAR_SLOT_CHANGED", "ACTIONBAR_PAGE_CHANGED",
 local f = CreateFrame("Frame")
 local stale = {}
 
+local function Add(b, lab)
+    if type(b) ~= "table" then return end
+    if lab then labButtons[b] = true end
+    if known[b] then return end
+    known[b] = true
+    buttons[#buttons + 1] = b
+    -- a reagent count can change after our refresh for the bag change (Soul Fire going
+    -- to 1 shard hides it): move the number with it
+    if type(b.UpdateCount) == "function" then
+        hooksecurefunc(b, "UpdateCount", function()
+            local fs = labels[b]
+            if fs and fs:IsShown() then pcall(Place, fs, b) end
+        end)
+    end
+end
+
+local function Moved() ns.RefreshButtons() end
+local hookedLabs = {}
+
+local function Discover()
+    for _, prefix in ipairs(BARS) do
+        for i = 1, 12 do Add(_G[prefix .. i]) end
+    end
+    for _, major in ipairs(LABS) do
+        local lib = LibStub and LibStub(major, true)
+        if lib and not hookedLabs[lib] and lib.RegisterCallback then
+            hookedLabs[lib] = true
+            local function On(name, fn) pcall(lib.RegisterCallback, "MeioDPS", name, fn) end
+            On("OnButtonCreated", function(_, b)
+                Add(b, true)
+                ns.RefreshButtons()
+            end)
+            On("OnButtonUpdate", Moved)
+            On("OnButtonContentsChanged", Moved)
+        end
+        if lib and type(lib.buttonRegistry) == "table" then
+            for b in pairs(lib.buttonRegistry) do Add(b, true) end
+        end
+    end
+    for i = 1, 180 do
+        for _, name in ipairs(NAMED) do Add(_G[name:format(i)]) end
+    end
+    for bar = 1, 15 do
+        for i = 1, 12 do Add(_G[("ElvUI_Bar%dButton%d"):format(bar, i)]) end
+    end
+end
+
 local function Register(event, unit)
     -- an event this client lacks errors on register
     if unit then
@@ -155,12 +247,7 @@ local function Register(event, unit)
 end
 
 function ns.InitButtons()
-    for _, prefix in ipairs(BARS) do
-        for i = 1, 12 do
-            local b = _G[prefix .. i]
-            if b then buttons[#buttons + 1] = b end
-        end
-    end
+    Discover()
     for _, e in ipairs(STALE) do
         stale[e] = true
         Register(e)
@@ -170,22 +257,32 @@ function ns.InitButtons()
     stale.UNIT_STATS = true
     Register("PLAYER_ENTERING_WORLD")
     Register("PLAYER_REGEN_ENABLED")
-    f:SetScript("OnEvent", function(_, event)
+    Register("ADDON_LOADED")
+    f:SetScript("OnEvent", function(_, event, name)
+        if event == "ADDON_LOADED" then
+            if not BAR_ADDONS[name] then return end
+            Discover()
+            return ns.RefreshButtons()
+        end
         if event == "PLAYER_REGEN_ENABLED" then
             if not staleAfterFight then return end
             staleAfterFight = nil
             return ns.RefreshButtons(true)
         end
         if event == "PLAYER_ENTERING_WORLD" then
+            Discover()
             -- descriptions can still be loading at login
             C_Timer.After(3, function() ns.RefreshButtons(true) end)
         end
         ns.RefreshButtons(stale[event])
     end)
-    -- paging and stance swaps change a button's slot
+    -- paging and stance swaps change a button's slot; a bar addon's button can be new
     if EventRegistry and EventRegistry.RegisterCallback then
         pcall(EventRegistry.RegisterCallback, EventRegistry, "ActionButton.OnActionChanged",
-            function() ns.RefreshButtons() end, f)
+            function(_, b)
+                Add(b)
+                ns.RefreshButtons()
+            end, f)
     end
     ns.RefreshButtons(true)
 end

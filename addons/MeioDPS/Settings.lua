@@ -25,9 +25,11 @@ local TIPS = {
         .. "to compare weapons.",
 }
 
+local OFF = { debug = true, buttons = true }
+
 local function Checkbox(key, name, tip)
     local setting = Settings.RegisterAddOnSetting(category, "MEIODPS_" .. key:upper(), key,
-        ns.db, Settings.VarType.Boolean, name, key ~= "debug")
+        ns.db, Settings.VarType.Boolean, name, not OFF[key])
     Settings.CreateCheckbox(category, setting, tip)
     return setting
 end
@@ -67,6 +69,13 @@ function ns.RegisterSettings()
             s:SetValueChangedCallback(function() ns.RefreshButtons() end)
         end
     end
+    if ns.TABLE_LISTED and layout and CreateSettingsButtonInitializer then
+        Header(layout, "Spell table", "Your damage spells side by side. /meiodps spells")
+        layout:AddInitializer(CreateSettingsButtonInitializer("Damage spells",
+            "Open spell table", ns.OpenTableFromSettings, "Opens a window with every damage "
+            .. "spell you know: damage, per cast second, per mana and measured, best in "
+            .. "green. Click a column to sort.", true))
+    end
     Header(layout, "Troubleshooting", "/meiodps debug, /meiodps forget")
     Checkbox("debug", "Print each fight", "After each fight, prints in chat the casts "
         .. "MeioDPS counted and the damage meter's totals.")
@@ -76,6 +85,12 @@ function ns.RegisterSettings()
             .. "again from your next fight.", true))
     end
     Settings.RegisterAddOnCategory(category)
+end
+
+-- the panel would sit over the window
+function ns.OpenTableFromSettings()
+    if SettingsPanel and SettingsPanel:IsShown() then pcall(HideUIPanel, SettingsPanel) end
+    ns.ShowTable()
 end
 
 function ns.OpenSettings()
