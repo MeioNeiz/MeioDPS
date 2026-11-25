@@ -41,6 +41,11 @@ Settings: Esc > Options > AddOns > MeioDPS, or `/meiodps`.
 
 - Damage on Bartender4, ElvUI and Dominos buttons too
 - Works on non-English game clients
+- A table of every damage spell you know, side by side: damage, per cast second, per mana
+  and measured; click a column to sort (`/meiodps spells`)
+
+![Coming soon: MeioDPS spell table: 14 Warlock spells with damage, per cast second, per
+mana and measured, best in each column in green](docs/soon.png)
 
 ## Install
 
