@@ -1,7 +1,7 @@
 # Meio DPS
 
-Damage and DPS on your spell, attack and weapon tooltips, and what each really did in your
-fights.
+Which rank gives the most damage for your mana? Every spell tooltip shows its damage, DPS
+and what it really hit for in your fights.
 
 For WoW Forever.
 
