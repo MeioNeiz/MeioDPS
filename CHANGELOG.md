@@ -1,5 +1,11 @@
 # Meio DPS
 
+## 1.3.0
+
+- GCD line on every spell and ability: the global cooldown it starts (1.5 s, 1 s for
+  rogues' attacks), or "none" for one you can use straight after another, handy for
+  macros. From the game's own spell data. Off with `/meiodps gcd` or Settings > GCD
+
 ## 1.2.0
 
 - Damage on action buttons is now off by default. This update turns it off once for

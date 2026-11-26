@@ -19,6 +19,8 @@ local TIPS = {
     measured = "Measured line: what the spell really did per cast in your fights, from "
         .. "Blizzard's damage meter, after 3 casts. Includes resists, crits and talents. "
         .. "Melee: per second your auto attack was on.",
+    gcd = "GCD line on every spell and ability: the global cooldown it starts, or none for "
+        .. "one you can use straight after another (good for macros).",
     auto = "Damage and DPS per swing or shot on Attack, Auto Shot and Shoot (wand), from "
         .. "your character sheet.",
     weapon = "Weapon tooltips: the weapon's DPS with your attack power and buffs added, "

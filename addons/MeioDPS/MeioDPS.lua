@@ -31,7 +31,7 @@ local BAD = { 1, 0.5, 0.5 }
 
 local DEFAULTS = {
     enabled = true, mana = true, heal = true, shards = true, lifetap = true, ranks = true,
-    expected = true, measured = true, auto = true, weapon = true,
+    expected = true, measured = true, auto = true, weapon = true, gcd = true,
     buttons = false, buttonShow = "expected",
 }
 local db, charDB
@@ -92,12 +92,19 @@ local function Cost(id)
     end
 end
 
--- the spell's own cooldown and the global cooldown it starts (1 s for rogues), in seconds
-local function Cooldowns(id)
-    if not GetSpellBaseCooldown then return 0, GCD end
+-- the spell's own cooldown and the global cooldown it starts (1 s for rogues), in seconds,
+-- from the client's spell data: gcd 0 for a spell off the GCD, nil when the client says none
+local function BaseCooldowns(id)
+    if not GetSpellBaseCooldown then return end
     local cd, gcd = GetSpellBaseCooldown(id)
     cd, gcd = Num(cd), Num(gcd)
-    return (cd or 0) / 1000, gcd and gcd > 0 and gcd / 1000 or GCD
+    return (cd or 0) / 1000, gcd and gcd / 1000
+end
+
+-- Classic rules: haste shortens casts, never the GCD, so the client's number stands
+local function Cooldowns(id)
+    local cd, gcd = BaseCooldowns(id)
+    return cd or 0, gcd and gcd > 0 and gcd or GCD
 end
 
 -- Equal-level spell hit: 96% plus gear, capped at 99%
@@ -211,6 +218,22 @@ local function AddShiftHint(tt)
     if tt.meioShiftHint then return end
     tt.meioShiftHint = true
     tt:AddLine("|cff999999Shift: more|r")
+end
+
+-- "GCD 1.5 s", "1 s" or "none"; true when it had its say
+local function AddGCDLine(tt, id, gap)
+    if not db.gcd then return true end
+    local passive = C_Spell.IsSpellPassive and C_Spell.IsSpellPassive(id)
+    if passive ~= nil and (not canaccess(passive) or passive == true) then return true end
+    local _, gcd = BaseCooldowns(id)
+    if not gcd then return true end
+    if gap then tt:AddLine(" ") end
+    if gcd <= 0 then
+        Line(tt, "GCD", "none")
+        return true
+    end
+    Line(tt, "GCD", Secs(gcd))
+    return true
 end
 
 local function AddShardLine(tt, id)
@@ -362,7 +385,7 @@ local function AddSpellLines(tt, id)
             Line(tt, "Measured", ("%s per cast  (%d casts)"):format(Fmt(m.damage / m.casts),
                 m.casts), REAL)
         end
-        return
+        return AddGCDLine(tt, id)
     end
     -- on your next swing: the swing happens anyway, so what it adds is the difference
     if swing then
@@ -400,10 +423,11 @@ local function AddSpellLines(tt, id)
         local rate = not perSecond and " per cast" or (", %s DPS"):format(Fmt(avg / a.rateTime))
         Line(tt, "Measured", ("%s%s  (%d casts)"):format(Fmt(avg), rate, m.casts), REAL)
     end
+    AddGCDLine(tt, id)
 
     if not shift then
         AddShiftHint(tt)
-        return
+        return true
     end
     local d = a.data
     if a.weapon then
@@ -447,6 +471,7 @@ local function AddSpellLines(tt, id)
             have and have.casts or 0), DIM)
     end
     if db.ranks and not pet and not a.weapon then AddRankLines(tt, id) end
+    return true
 end
 
 local function AddMeleeLines(tt, shift)
@@ -574,7 +599,15 @@ local function OnSpellTooltip(tt, data)
                 AddShardLine(tt, id)
             end
     end
-    if add then Report(pcall(add, tt, id)) end
+    local ok, done = true, false
+    if add then
+        ok, done = pcall(add, tt, id)
+        Report(ok, done)
+    end
+    -- every other spell gets the GCD line alone (auto attacks have none)
+    if ok and not done and not ns.AUTO[id] then
+        Report(pcall(AddGCDLine, tt, id, not add or add == AddSpellLines))
+    end
 end
 
 -- the weapon's DPS with your attack power, under the weapon's own
@@ -871,6 +904,7 @@ ns.TOGGLES = {
         label = "Expected damage" },
     { key = "measured", what = "measured damage per cast (damage meter)",
         label = "Measured damage" },
+    { key = "gcd", what = "global cooldown on spell tooltips", label = "GCD" },
     { key = "auto", what = "damage and DPS on Attack, Auto Shot and Shoot",
         label = "Auto attacks" },
     { key = "weapon", what = "DPS with your attack power on weapon tooltips",

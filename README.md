@@ -6,8 +6,8 @@ and what it really hit for in your fights.
 For WoW Forever.
 
 ![Shadow Bolt and Sinister Strike tooltips: before, only the game's text; with Meio DPS,
-damage, DPS, damage per mana or energy, expected damage and the measured damage per
-cast](docs/before-after.png)
+damage, DPS, damage per mana or energy, expected damage, the measured damage per cast and
+the GCD](docs/before-after.png)
 
 ## What it does
 
@@ -21,6 +21,8 @@ really did.
 - Attack, Auto Shot and wand Shoot: damage per swing or shot, and DPS
 - Weapons: their DPS with your attack power
 - Measured: real damage per cast from Blizzard's damage meter
+- GCD on every spell and ability: the global cooldown it starts, or none (handy for
+  macros)
 - Action buttons, off by default: each damage spell's damage per cast on its button (or
   measured, or DPS), on Blizzard's bars, Bartender4, ElvUI and Dominos. Turn on with
   `/meiodps buttons on` or Settings > Action buttons
