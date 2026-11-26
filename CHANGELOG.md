@@ -1,5 +1,10 @@
 # Meio DPS
 
+## 1.3.1
+
+- Fixed: profession recipes (trainer, profession window) showed a "GCD none" line. The GCD
+  line is now left off recipes
+
 ## 1.3.0
 
 - GCD line on every spell and ability: the global cooldown it starts (1.5 s, 1 s for

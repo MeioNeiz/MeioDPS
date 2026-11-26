@@ -220,9 +220,28 @@ local function AddShiftHint(tt)
     tt:AddLine("|cff999999Shift: more|r")
 end
 
+-- profession window, a profession trainer's recipes and the profession spells themselves:
+-- spell tooltips too, but crafting's GCD isn't what anyone reads them for
+local function IsRecipe(tt, id)
+    local link = C_Spell.GetSpellTradeSkillLink and C_Spell.GetSpellTradeSkillLink(id)
+    if type(link) == "string" and canaccess(link) and link:find("trade:", 1, true) then
+        return true
+    end
+    local info = tt.GetProcessingTooltipInfo and tt:GetProcessingTooltipInfo()
+    local getter = Readable(info) and info.getterName
+    if type(getter) ~= "string" or not canaccess(getter) then return false end
+    if getter:find("TradeSkill") or getter:find("Craft") or getter:find("Recipe") then
+        return true
+    end
+    if getter ~= "GetTrainerService" or not GetTrainerServiceSkillReq then return false end
+    local args = Readable(info.getterArgs) and info.getterArgs
+    local index = args and Num(args[1])
+    return index and GetTrainerServiceSkillReq(index) ~= nil or false
+end
+
 -- "GCD 1.5 s", "1 s" or "none"; true when it had its say
 local function AddGCDLine(tt, id, gap)
-    if not db.gcd then return true end
+    if not db.gcd or IsRecipe(tt, id) then return true end
     local passive = C_Spell.IsSpellPassive and C_Spell.IsSpellPassive(id)
     if passive ~= nil and (not canaccess(passive) or passive == true) then return true end
     local _, gcd = BaseCooldowns(id)
